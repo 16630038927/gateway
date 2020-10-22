@@ -1,0 +1,29 @@
+server:
+  port: 7001
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8000/eureka
+spring:
+  application:
+    name: gateway-center
+  cloud:
+    gateway:
+      routes:
+        - id: proud
+          uri: lb://product
+          predicates:
+            - Path=/proud/**
+          filters:
+            - RewritePath=/proud/(?<segment>.*),/$\{segment}
+            - name: RequestRateLimiter
+              args:
+                  key-resolver: '#{@uriKeyResolver}'
+                  redis-rate-limiter.replenishRate: 1
+                  redis-rate-limiter.burstCapacity: 2
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
